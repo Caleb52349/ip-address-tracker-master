@@ -1,0 +1,135 @@
+@import "./variables";
+
+@mixin dark {
+    .btn-dark {
+        background: $VeryDarkGray;
+        padding: 15px;
+        border: none;
+        border-radius: 0 10px 10px 0;
+        position: absolute;
+        right: 0;
+        height: 50px;
+        width: 50px;
+        cursor: pointer;
+    }
+}
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+main {
+    max-width: 100%;
+}
+@mixin font($font-size, $font-weight) {
+    font-family: "Rubik", sans-serif;
+    font-size: $font-size;
+    font-weight: $font-weight;
+    color: $VeryDarkGray;
+}
+
+@include dark();
+
+body {
+    box-sizing: inherit;
+    @include font($font-size, -$font-weight);
+}
+h1.title {
+    color: #fff !important;
+    @include font(24px, 700);
+    margin-bottom: 20px;
+}
+
+.form-info {
+    background: url("/images/pattern-bg.png") no-repeat 100% 100% / cover;
+    padding: 20px;
+    text-align: center;
+    min-height: 250px;
+
+    .description {
+        position: relative;
+        max-width: 380px;
+        margin: auto;
+
+        .form-control {
+            padding: 15px;
+            width: 95%;
+            border-radius: 10px 0 0 10px;
+            border: none;
+            font-size: 0.9rem;
+        }
+    }
+}
+
+.display-info {
+    margin-top: -110px;
+    background-color: #fff;
+    max-width: 90%;
+    margin-left: auto;
+    margin-right: auto;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+    position: relative;
+    z-index: 1000;
+    padding: 30px;
+    border-radius: 10px;
+
+    .info {
+        display: flex;
+        flex-flow: column;
+        justify-content: center;
+        padding: 0 15px;
+        align-items: center;
+
+        .info-title {
+            font-size: 0.85rem;
+            font-weight: 400;
+            color: $DarkGray;
+            text-transform: uppercase;
+        }
+
+        span.results {
+            font-weight: 600;
+            color: $VeryDarkGray;
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+            margin-top: 5px;
+        }
+    }
+}
+
+.map-container {
+    background-color: black;
+    overflow: hidden;
+    margin-top: -15rem;
+    min-height: 100vh;
+}
+.leaflet-control-zoom {
+    display: none;
+}
+
+@media (min-width: 1024px) {
+    .display-info {
+        max-width: 80%;
+        display: flex;
+        height: auto;
+        justify-content: center;
+        align-items: center;
+        margin-top: -4.5em;
+    }
+
+    .info {
+        flex-flow: column;
+        text-align: left;
+        border-right: 1px solid;
+        text-align: center;
+        &:last-child {
+            border-right: none;
+        }
+    }
+    .map-container {
+        height: 100vh;
+        margin-top: -70px;
+    }
+}
