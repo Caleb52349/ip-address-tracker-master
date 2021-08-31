@@ -1,9 +1,17 @@
+const uniqid = require('uniqid');
+
+
+require('dotenv').config()
+
+
+
 
 // variable to form api url
-const secret_api = 'at_UVGXRmZdoWVpv9i1MGG1UIDOiYXRB'
+const secret_api =process.env.SECRET_API;
 const bypass_cors_url = 'https://cors-anywhere.herokuapp.com/'
 const api_uri = 'https://geo.ipify.org/api/'
 let current_verion = 'v1'
+
 
 // elements to update 
 let current_ip = document.getElementById('default_ip')
@@ -45,6 +53,7 @@ updateMarker = (update_marker = [-33.665, 18.993]) => {
     L.marker(update_marker, { icon: myIcon }).addTo(map);
 }
 
+
 getIPDetails = (default_ip) => {
     if (default_ip == undefined) {
         var ip_url = `${bypass_cors_url}${api_uri}${current_verion}?apiKey=${secret_api}`
@@ -79,3 +88,4 @@ search_btn.addEventListener('click', e => {
     }
     alert("Please enter a valid IP address");
 })
+
