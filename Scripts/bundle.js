@@ -773,8 +773,6 @@ process.umask = function() { return 0; };
 },{}],5:[function(require,module,exports){
 (function (process){(function (){
 const uniqid = require('uniqid');
-
-
 require('dotenv').config()
 
 
@@ -835,7 +833,7 @@ getIPDetails = (default_ip) => {
     else {
         var ip_url = `${bypass_cors_url}${api_uri}${current_verion}?apiKey=${secret_api}&ipAddress=${default_ip}`
     }
-    fetch(ip_url, headers_option)
+    fetch(ip_url,headers_option)
         .then(results => results.json())
         .then(data => {
             current_ip.innerHTML = data.ip
