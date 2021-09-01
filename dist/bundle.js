@@ -1,12 +1,15 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
-(function (process){(function (){
 
-window.process = {
+
+/*window.process = {
     env: {
-        NODE_ENV: 'development'
-        
+        NODE_ENV:"development",
+        API_KEY:"at_UVGXRmZdoWVpv9i1MGG1UIDOiYXRB"
     }
 } 
+*/
+
+var API_KEY = config.API_KEY
 
 const uniqid = require('uniqid')
 const dotenv = require('dotenv')
@@ -14,12 +17,12 @@ require('dotenv').config()
 
 
 
-
 // variable to form api url
-const secret_api =process.env.API_KEY;
-//const bypass_cors_url = 'https://cors-anywhere.herokuapp.com/'
+//const secret_api =API_KEY;
+const bypass_cors_url = 'https://cors-anywhere.herokuapp.com/'
 const api_uri = 'https://geo.ipify.org/api/'
 let current_verion = 'v1'
+
 
 
 // elements to update 
@@ -65,12 +68,12 @@ updateMarker = (update_marker = [-33.665, 18.993]) => {
 
 getIPDetails = (default_ip) => {
     if (default_ip == undefined) {
-        var ip_url = `${api_uri}${current_verion}?apiKey=${secret_api}`
+        var ip_url = `${bypass_cors_url}${api_uri}${current_verion}?apiKey=${API_KEY}`
     }
     else {
-        var ip_url = `${api_uri}${current_verion}?apiKey=${secret_api}&ipAddress=${default_ip}`
+        var ip_url = `${bypass_cors_url}${api_uri}${current_verion}?apiKey=${API_KEY}&ipAddress=${default_ip}`
     }
-    fetch(ip_url)
+    fetch(ip_url,headers_option)
         .then(results => results.json())
         .then(data => {
             current_ip.innerHTML = data.ip
@@ -99,8 +102,7 @@ search_btn.addEventListener('click', e => {
 })
 
 
-}).call(this)}).call(this,require('_process'))
-},{"_process":6,"dotenv":3,"uniqid":7}],2:[function(require,module,exports){
+},{"dotenv":3,"uniqid":7}],2:[function(require,module,exports){
 
 },{}],3:[function(require,module,exports){
 (function (process){(function (){
