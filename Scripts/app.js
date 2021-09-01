@@ -1,6 +1,7 @@
 
 import {API_KEY} from "./apikey.js"
 
+
 // variable to form api url
 const secret_api = API_KEY
 const bypass_cors_url = 'https://cors-anywhere.herokuapp.com/'
@@ -44,8 +45,8 @@ var myIcon = L.icon({
 })
 
 updateMarker = (update_marker = [-33.665, 18.993]) => {
-    map.setView(update_marker, 13);
-    L.marker(update_marker, { icon: myIcon }).addTo(map);
+    map.setView(update_marker, 13)
+    L.marker(update_marker, { icon: myIcon }).addTo(map)
 }
 
 
