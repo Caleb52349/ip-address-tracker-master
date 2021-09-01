@@ -2,11 +2,12 @@
 window.process = {
     env: {
         NODE_ENV: 'development'
+        
     }
 } 
 
-const uniqid = require('uniqid');
-const dotenv = require('dotenv');
+const uniqid = require('uniqid')
+const dotenv = require('dotenv')
 require('dotenv').config()
 
 
