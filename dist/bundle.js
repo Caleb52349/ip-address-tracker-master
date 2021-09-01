@@ -1,5 +1,12 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 (function (process){(function (){
+
+window.process = {
+    env: {
+        NODE_ENV: 'development'
+    }
+} 
+
 const uniqid = require('uniqid');
 const dotenv = require('dotenv');
 require('dotenv').config()
@@ -8,7 +15,7 @@ require('dotenv').config()
 
 
 // variable to form api url
-const secret_api =process.env.SECRET_API;
+const secret_api =process.env.API_KEY;
 //const bypass_cors_url = 'https://cors-anywhere.herokuapp.com/'
 const api_uri = 'https://geo.ipify.org/api/'
 let current_verion = 'v1'
