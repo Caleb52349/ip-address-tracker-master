@@ -16,7 +16,7 @@ require('dotenv').config()
 
 
 // variable to form api url
-const secret_api =process.env.API_KEY;
+const secret_api =process.env.NODE_ENV;
 //const bypass_cors_url = 'https://cors-anywhere.herokuapp.com/'
 const api_uri = 'https://geo.ipify.org/api/'
 let current_verion = 'v1'
