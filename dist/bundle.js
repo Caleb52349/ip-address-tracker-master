@@ -1,6 +1,222 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+(function (process){(function (){
+const uniqid = require('uniqid');
+const dotenv = require('dotenv');
+require('dotenv').config()
 
-},{}],2:[function(require,module,exports){
+
+
+
+// variable to form api url
+const secret_api =process.env.SECRET_API;
+//const bypass_cors_url = 'https://cors-anywhere.herokuapp.com/'
+const api_uri = 'https://geo.ipify.org/api/'
+let current_verion = 'v1'
+
+
+// elements to update 
+let current_ip = document.getElementById('default_ip')
+let current_town = document.getElementById('default_location')
+let current_zone = document.getElementById('default_zone')
+let current_isp = document.getElementById('default_isp')
+
+// form elements 
+const entered_ip = document.getElementById('ip_address')
+const search_btn = document.getElementById('search_btn')
+
+//bypass request 
+const headers_option = {
+    headers: {
+        'Access-Control-Allow-Origin': '*',
+    }
+}
+
+
+
+const map = L.map('display-map', {
+    'center': [0, 0],
+    'zoom': 0,
+    'layers': [
+        L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+        })
+    ]
+})
+
+var myIcon = L.icon({
+    iconUrl: './images/icon-location.svg',
+    iconSize: [46, 56],
+    iconAnchor: [23, 28],
+});
+
+updateMarker = (update_marker = [-33.665, 18.993]) => {
+    map.setView(update_marker, 13);
+    L.marker(update_marker, { icon: myIcon }).addTo(map);
+}
+
+
+getIPDetails = (default_ip) => {
+    if (default_ip == undefined) {
+        var ip_url = `${api_uri}${current_verion}?apiKey=${secret_api}`
+    }
+    else {
+        var ip_url = `${api_uri}${current_verion}?apiKey=${secret_api}&ipAddress=${default_ip}`
+    }
+    fetch(ip_url)
+        .then(results => results.json())
+        .then(data => {
+            current_ip.innerHTML = data.ip
+            current_town.innerHTML = `${data.location.city} ${data.location.country} ${data.location.postalCode}`
+            current_zone.innerHTML = data.location.timezone
+            current_isp.innerHTML = data.isp
+            console.log(data)
+            // update map marker 
+            updateMarker([data.location.lat, data.location.lng])
+        })
+        .catch(error => {
+            alert("Unable to get IP details")
+            console.log(error)
+        })
+}
+
+document.addEventListener('load', updateMarker())
+
+search_btn.addEventListener('click', e => {
+    e.preventDefault()
+    if (entered_ip.value != '' && entered_ip.value != null) {
+        getIPDetails(entered_ip.value)
+        return
+    }
+    alert("Please enter a valid IP address");
+})
+
+
+}).call(this)}).call(this,require('_process'))
+},{"_process":6,"dotenv":3,"uniqid":7}],2:[function(require,module,exports){
+
+},{}],3:[function(require,module,exports){
+(function (process){(function (){
+/* @flow */
+/*::
+
+type DotenvParseOptions = {
+  debug?: boolean
+}
+
+// keys and values from src
+type DotenvParseOutput = { [string]: string }
+
+type DotenvConfigOptions = {
+  path?: string, // path to .env file
+  encoding?: string, // encoding of .env file
+  debug?: string // turn on logging for debugging purposes
+}
+
+type DotenvConfigOutput = {
+  parsed?: DotenvParseOutput,
+  error?: Error
+}
+
+*/
+
+const fs = require('fs')
+const path = require('path')
+const os = require('os')
+
+function log (message /*: string */) {
+  console.log(`[dotenv][DEBUG] ${message}`)
+}
+
+const NEWLINE = '\n'
+const RE_INI_KEY_VAL = /^\s*([\w.-]+)\s*=\s*(.*)?\s*$/
+const RE_NEWLINES = /\\n/g
+const NEWLINES_MATCH = /\r\n|\n|\r/
+
+// Parses src into an Object
+function parse (src /*: string | Buffer */, options /*: ?DotenvParseOptions */) /*: DotenvParseOutput */ {
+  const debug = Boolean(options && options.debug)
+  const obj = {}
+
+  // convert Buffers before splitting into lines and processing
+  src.toString().split(NEWLINES_MATCH).forEach(function (line, idx) {
+    // matching "KEY' and 'VAL' in 'KEY=VAL'
+    const keyValueArr = line.match(RE_INI_KEY_VAL)
+    // matched?
+    if (keyValueArr != null) {
+      const key = keyValueArr[1]
+      // default undefined or missing values to empty string
+      let val = (keyValueArr[2] || '')
+      const end = val.length - 1
+      const isDoubleQuoted = val[0] === '"' && val[end] === '"'
+      const isSingleQuoted = val[0] === "'" && val[end] === "'"
+
+      // if single or double quoted, remove quotes
+      if (isSingleQuoted || isDoubleQuoted) {
+        val = val.substring(1, end)
+
+        // if double quoted, expand newlines
+        if (isDoubleQuoted) {
+          val = val.replace(RE_NEWLINES, NEWLINE)
+        }
+      } else {
+        // remove surrounding whitespace
+        val = val.trim()
+      }
+
+      obj[key] = val
+    } else if (debug) {
+      log(`did not match key and value when parsing line ${idx + 1}: ${line}`)
+    }
+  })
+
+  return obj
+}
+
+function resolveHome (envPath) {
+  return envPath[0] === '~' ? path.join(os.homedir(), envPath.slice(1)) : envPath
+}
+
+// Populates process.env from .env file
+function config (options /*: ?DotenvConfigOptions */) /*: DotenvConfigOutput */ {
+  let dotenvPath = path.resolve(process.cwd(), '.env')
+  let encoding /*: string */ = 'utf8'
+  let debug = false
+
+  if (options) {
+    if (options.path != null) {
+      dotenvPath = resolveHome(options.path)
+    }
+    if (options.encoding != null) {
+      encoding = options.encoding
+    }
+    if (options.debug != null) {
+      debug = true
+    }
+  }
+
+  try {
+    // specifying an encoding returns a string instead of a buffer
+    const parsed = parse(fs.readFileSync(dotenvPath, { encoding }), { debug })
+
+    Object.keys(parsed).forEach(function (key) {
+      if (!Object.prototype.hasOwnProperty.call(process.env, key)) {
+        process.env[key] = parsed[key]
+      } else if (debug) {
+        log(`"${key}" is already defined in \`process.env\` and will not be overwritten`)
+      }
+    })
+
+    return { parsed }
+  } catch (e) {
+    return { error: e }
+  }
+}
+
+module.exports.config = config
+module.exports.parse = parse
+
+}).call(this)}).call(this,require('_process'))
+},{"_process":6,"fs":2,"os":4,"path":5}],4:[function(require,module,exports){
 exports.endianness = function () { return 'LE' };
 
 exports.hostname = function () {
@@ -51,7 +267,7 @@ exports.homedir = function () {
 	return '/'
 };
 
-},{}],3:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 (function (process){(function (){
 // 'path' module extracted from Node.js v8.11.1 (only the posix part)
 // transplited with Babel
@@ -584,7 +800,7 @@ posix.posix = posix;
 module.exports = posix;
 
 }).call(this)}).call(this,require('_process'))
-},{"_process":4}],4:[function(require,module,exports){
+},{"_process":6}],6:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -770,219 +986,54 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],5:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 (function (process){(function (){
-//const uniqid = require('uniqid');
-require('dotenv').config()
-
-
-
-
-// variable to form api url
-const secret_api =process.env.SECRET_API;
-//const bypass_cors_url = 'https://cors-anywhere.herokuapp.com/'
-const api_uri = 'https://geo.ipify.org/api/'
-let current_verion = 'v1'
-
-
-// elements to update 
-let current_ip = document.getElementById('default_ip')
-let current_town = document.getElementById('default_location')
-let current_zone = document.getElementById('default_zone')
-let current_isp = document.getElementById('default_isp')
-
-// form elements 
-const entered_ip = document.getElementById('ip_address')
-const search_btn = document.getElementById('search_btn')
-
-//bypass request 
-const headers_option = {
-    headers: {
-        'Access-Control-Allow-Origin': '*',
-    }
-}
-
-
-
-const map = L.map('display-map', {
-    'center': [0, 0],
-    'zoom': 0,
-    'layers': [
-        L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-        })
-    ]
-})
-
-var myIcon = L.icon({
-    iconUrl: './images/icon-location.svg',
-    iconSize: [46, 56],
-    iconAnchor: [23, 28],
-});
-
-updateMarker = (update_marker = [-33.665, 18.993]) => {
-    map.setView(update_marker, 13);
-    L.marker(update_marker, { icon: myIcon }).addTo(map);
-}
-
-
-getIPDetails = (default_ip) => {
-    if (default_ip == undefined) {
-        var ip_url = `${api_uri}${current_verion}?apiKey=${secret_api}`
-    }
-    else {
-        var ip_url = `${api_uri}${current_verion}?apiKey=${secret_api}&ipAddress=${default_ip}`
-    }
-    fetch(ip_url)
-        .then(results => results.json())
-        .then(data => {
-            current_ip.innerHTML = data.ip
-            current_town.innerHTML = `${data.location.city} ${data.location.country} ${data.location.postalCode}`
-            current_zone.innerHTML = data.location.timezone
-            current_isp.innerHTML = data.isp
-            console.log(data)
-            // update map marker 
-            updateMarker([data.location.lat, data.location.lng])
-        })
-        .catch(error => {
-            alert("Unable to get IP details")
-            console.log(error)
-        })
-}
-
-document.addEventListener('load', updateMarker())
-
-search_btn.addEventListener('click', e => {
-    e.preventDefault()
-    if (entered_ip.value != '' && entered_ip.value != null) {
-        getIPDetails(entered_ip.value)
-        return
-    }
-    alert("Please enter a valid IP address");
-})
-
-
-}).call(this)}).call(this,require('_process'))
-},{"_process":4,"dotenv":6}],6:[function(require,module,exports){
-(function (process){(function (){
-/* @flow */
-/*::
-
-type DotenvParseOptions = {
-  debug?: boolean
-}
-
-// keys and values from src
-type DotenvParseOutput = { [string]: string }
-
-type DotenvConfigOptions = {
-  path?: string, // path to .env file
-  encoding?: string, // encoding of .env file
-  debug?: string // turn on logging for debugging purposes
-}
-
-type DotenvConfigOutput = {
-  parsed?: DotenvParseOutput,
-  error?: Error
-}
-
+/* 
+(The MIT License)
+Copyright (c) 2014-2021 Halász Ádám <adam@aimform.com>
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-const fs = require('fs')
-const path = require('path')
-const os = require('os')
+//  Unique Hexatridecimal ID Generator
+// ================================================
 
-function log (message /*: string */) {
-  console.log(`[dotenv][DEBUG] ${message}`)
-}
-
-const NEWLINE = '\n'
-const RE_INI_KEY_VAL = /^\s*([\w.-]+)\s*=\s*(.*)?\s*$/
-const RE_NEWLINES = /\\n/g
-const NEWLINES_MATCH = /\r\n|\n|\r/
-
-// Parses src into an Object
-function parse (src /*: string | Buffer */, options /*: ?DotenvParseOptions */) /*: DotenvParseOutput */ {
-  const debug = Boolean(options && options.debug)
-  const obj = {}
-
-  // convert Buffers before splitting into lines and processing
-  src.toString().split(NEWLINES_MATCH).forEach(function (line, idx) {
-    // matching "KEY' and 'VAL' in 'KEY=VAL'
-    const keyValueArr = line.match(RE_INI_KEY_VAL)
-    // matched?
-    if (keyValueArr != null) {
-      const key = keyValueArr[1]
-      // default undefined or missing values to empty string
-      let val = (keyValueArr[2] || '')
-      const end = val.length - 1
-      const isDoubleQuoted = val[0] === '"' && val[end] === '"'
-      const isSingleQuoted = val[0] === "'" && val[end] === "'"
-
-      // if single or double quoted, remove quotes
-      if (isSingleQuoted || isDoubleQuoted) {
-        val = val.substring(1, end)
-
-        // if double quoted, expand newlines
-        if (isDoubleQuoted) {
-          val = val.replace(RE_NEWLINES, NEWLINE)
+//  Dependencies
+// ================================================
+var pid = typeof process !== 'undefined' && process.pid ? process.pid.toString(36) : '' ;
+var address = '';
+if(typeof __webpack_require__ !== 'function' && typeof require !== 'undefined'){
+    var mac = '', os = require('os'); 
+    if(os.networkInterfaces) var networkInterfaces = os.networkInterfaces();
+    if(networkInterfaces){
+        loop:
+        for(let interface_key in networkInterfaces){
+            const networkInterface = networkInterfaces[interface_key];
+            const length = networkInterface.length;
+            for(var i = 0; i < length; i++){
+                if(networkInterface[i] !== undefined && networkInterface[i].mac && networkInterface[i].mac != '00:00:00:00:00:00'){
+                    mac = networkInterface[i].mac; break loop;
+                }
+            }
         }
-      } else {
-        // remove surrounding whitespace
-        val = val.trim()
-      }
-
-      obj[key] = val
-    } else if (debug) {
-      log(`did not match key and value when parsing line ${idx + 1}: ${line}`)
+        address = mac ? parseInt(mac.replace(/\:|\D+/gi, '')).toString(36) : '' ;
     }
-  })
+} 
 
-  return obj
+//  Exports
+// ================================================
+module.exports = module.exports.default = function(prefix, suffix){ return (prefix ? prefix : '') + address + pid + now().toString(36) + (suffix ? suffix : ''); }
+module.exports.process = function(prefix, suffix){ return (prefix ? prefix : '') + pid + now().toString(36) + (suffix ? suffix : ''); }
+module.exports.time    = function(prefix, suffix){ return (prefix ? prefix : '') + now().toString(36) + (suffix ? suffix : ''); }
+
+//  Helpers
+// ================================================
+function now(){
+    var time = Date.now();
+    var last = now.last || time;
+    return now.last = time > last ? time : last + 1;
 }
-
-function resolveHome (envPath) {
-  return envPath[0] === '~' ? path.join(os.homedir(), envPath.slice(1)) : envPath
-}
-
-// Populates process.env from .env file
-function config (options /*: ?DotenvConfigOptions */) /*: DotenvConfigOutput */ {
-  let dotenvPath = path.resolve(process.cwd(), '.env')
-  let encoding /*: string */ = 'utf8'
-  let debug = false
-
-  if (options) {
-    if (options.path != null) {
-      dotenvPath = resolveHome(options.path)
-    }
-    if (options.encoding != null) {
-      encoding = options.encoding
-    }
-    if (options.debug != null) {
-      debug = true
-    }
-  }
-
-  try {
-    // specifying an encoding returns a string instead of a buffer
-    const parsed = parse(fs.readFileSync(dotenvPath, { encoding }), { debug })
-
-    Object.keys(parsed).forEach(function (key) {
-      if (!Object.prototype.hasOwnProperty.call(process.env, key)) {
-        process.env[key] = parsed[key]
-      } else if (debug) {
-        log(`"${key}" is already defined in \`process.env\` and will not be overwritten`)
-      }
-    })
-
-    return { parsed }
-  } catch (e) {
-    return { error: e }
-  }
-}
-
-module.exports.config = config
-module.exports.parse = parse
 
 }).call(this)}).call(this,require('_process'))
-},{"_process":4,"fs":1,"os":2,"path":3}]},{},[5]);
+},{"_process":6,"os":4}]},{},[1]);
