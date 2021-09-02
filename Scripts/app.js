@@ -4,7 +4,7 @@ import {API_KEY} from "./apikey.js"
 
 // variable to form api url
 const secret_api = API_KEY
-const bypass_cors_url = 'https://cors-anywhere.herokuapp.com/'
+//const bypass_cors_url = 'https://cors-anywhere.herokuapp.com/'
 const api_uri = 'https://geo.ipify.org/api/'
 let current_verion = 'v1'
 
@@ -44,20 +44,23 @@ var myIcon = L.icon({
     iconAnchor: [23, 28],
 })
 
-updateMarker = (update_marker = [-33.665, 18.993]) => {
+
+
+let updateMarker = (update_marker = [-33.665, 18.993]) => {
     map.setView(update_marker, 13)
     L.marker(update_marker, { icon: myIcon }).addTo(map)
 }
 
 
-getIPDetails = (default_ip) => {
+
+let getIPDetails = (default_ip) => {
     if (default_ip == undefined) {
-        var ip_url = `${bypass_cors_url}${api_uri}${current_verion}?apiKey=${secret_api}`
+        var ip_url = `${api_uri}${current_verion}?apiKey=${secret_api}`
     }
     else {
-        var ip_url = `${bypass_cors_url}${api_uri}${current_verion}?apiKey=${secret_api}&ipAddress=${default_ip}`
+        var ip_url = `${api_uri}${current_verion}?apiKey=${secret_api}&ipAddress=${default_ip}`
     }
-    fetch(ip_url,headers_option)
+    fetch(ip_url)
         .then(results => results.json())
         .then(data => {
             current_ip.innerHTML = data.ip
