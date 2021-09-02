@@ -1,6 +1,11 @@
 # Frontend Mentor - IP address tracker
 
-![Design preview for the IP address tracker coding challenge](./design/desktop-preview.jpg)
+## Desktop Display
+![Design preview for the IP address tracker coding challenge](./design/desktop-preview.jpg) 
+
+## Mobile Display
+![Design preview for the IP address tracker coding challenge](./design/mobile-design.jpg)
+
 
 ## Welcome! 👋
 
@@ -9,6 +14,7 @@ Thanks for checking out this front-end coding challenge.
 [Frontend Mentor](https://www.frontendmentor.io) challenges help you improve your coding skills by building realistic projects.
 
 **To do this challenge, you need a basic understanding of HTML, CSS and JavaScript.**
+- Link to Challenge: https://www.frontendmentor.io/challenges/ip-address-tracker-I8-0yYAH0
 
 ## Live Preview
 -Link: https://ip-address-tracker-bycaleb.netlify.app/
